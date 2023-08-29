@@ -8,26 +8,26 @@ char board[3][3];
 
 //main prototypes
 void choosePriority(char *player, char *AI);
-void play(char *player, char *AI);
+void play(char *player, char *computer);
 
 //auxiliary prototypes
 void resetBoard();
 void printBoard();
 int checkFreeSpaces();
 void playerMove(char *player);
-void easyAiMove(char *AI);
+void easyAiMove(char *computer);
 char checkWinner();
-void printWinner(char winner, char *player, char *AI);
+void printWinner(char winner, char *player, char *computer);
 
 int main(){
-    char player, AI;
+    char player, computer;
 
-    choosePriority(&player, &AI);
-    play(&player, &AI); //something is wrong here?
+    choosePriority(&player, &computer);
+    play(&player, &computer);
     return 0;
 }
 
-void choosePriority(char *player, char *AI){
+void choosePriority(char *player, char *computer){
     printf("Hello, and welcome to TicTacToe!\n");
     printf("Please select if you want to play as 'X' or as 'O'.");
     do {
@@ -37,10 +37,10 @@ void choosePriority(char *player, char *AI){
     } while (*player != 'X' && *player != 'O');
 
     if(*player == 'X'){
-        *AI = 'O';
+        *computer = 'O';
     }
     else{
-        *AI = 'X';
+        *computer = 'X';
     }
 }
 
@@ -73,7 +73,7 @@ int checkFreeSpaces(){
     return freeSpaces;
 }
 
-void play(char *player, char *AI){
+void play(char *player, char *computer){
     char answer = ' ';
     char winner = ' ';
 
@@ -87,14 +87,14 @@ void play(char *player, char *AI){
                 break;
             }
 
-            easyAiMove(AI);
+            easyAiMove(computer);
             winner = checkWinner();
             if(winner != ' ' || checkFreeSpaces() == 0){
                 break;
             }
         }
         printBoard();
-        printWinner(winner, player, AI);
+        printWinner(winner, player, computer);
         printf("\nWould you like to play again? (Y/N): ");
         scanf(" %c", &answer);
         answer = toupper(answer);
@@ -123,22 +123,17 @@ void playerMove(char *player){
 }
 
 //This function chooses a square randomly
-void easyAiMove(char *AI){
+void easyAiMove(char *computer){
     int x, y;
 
     //creates a seed based on current time
     srand(time(0));
-    if(checkFreeSpaces() > 0){
-        do{
-            x = rand() % 3;
-            y = rand() % 3;
-        } while (board[x][y] != ' ');
+    do{
+        x = rand() % 3;
+        y = rand() % 3;
+    } while (board[x][y] != ' ');
 
-        board[x][y] = *AI;
-    }
-    else{
-        printWinner(" ");
-    }
+    board[x][y] = *computer;
 }
 
 char checkWinner(){
@@ -167,12 +162,12 @@ char checkWinner(){
     return ' ';
 }
 
-void printWinner(char winner, char *player, char *AI){
+void printWinner(char winner, char *player, char *computer){
     if(winner == *player){
         printf("YOU WIN!");
     }
 
-    else if(winner == *AI){
+    else if(winner == *computer){
         printf("YOU LOSE!");
     }
 
