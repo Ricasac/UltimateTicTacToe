@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h>
 #include <ctype.h>
 #include <time.h>
 
 char board[3][3];
 
 //main prototypes
-void choosePriority(char *player, char *AI);
-void play(char *player, char *computer);
+int choosePriority(char *player, char *computer, int order);
+void play(char *player, char *computer, int order);
 
 //auxiliary prototypes
 void resetBoard();
@@ -18,20 +17,24 @@ void playerMove(char *player);
 void easyAiMove(char *computer);
 char checkWinner();
 void printWinner(char winner, char *player, char *computer);
+void cleanBufferStdin(void);
 
 int main(){
     char player, computer;
+    int order = 0;
 
-    choosePriority(&player, &computer);
-    play(&player, &computer);
+    //creates a seed based on current time
+    srand(time(0));
+    choosePriority(&player, &computer, order);
+    play(&player, &computer, order);
     return 0;
 }
 
-void choosePriority(char *player, char *computer){
+int choosePriority(char *player, char *computer, int order){
     printf("Hello, and welcome to TicTacToe!\n");
-    printf("Please select if you want to play as 'X' or as 'O'.");
+    printf("Please select if you want to play as 'X' or as 'O'.\n");
     do {
-        fflush(stdin);
+        cleanBufferStdin();
         scanf(" %c", player);
         *player = toupper(*player);
     } while (*player != 'X' && *player != 'O');
@@ -42,6 +45,14 @@ void choosePriority(char *player, char *computer){
     else{
         *computer = 'X';
     }
+
+    printf("Do you want to go first or second? (after choosing for the first time, it will alternate the playing order.)\n");
+    printf("Choose '1' for going first or '2' for going second.\n");
+    do {
+        cleanBufferStdin();
+        scanf("%d", &order);
+    } while (order != 1 && order != 2);
+    return order;
 }
 
 void resetBoard(){
@@ -73,26 +84,48 @@ int checkFreeSpaces(){
     return freeSpaces;
 }
 
-void play(char *player, char *computer){
+void play(char *player, char *computer, int order){
     char answer = ' ';
-    char winner = ' ';
 
     do {
+        char winner = ' ';
         resetBoard();
-        while(winner == ' ' && checkFreeSpaces() != 0) {
-            printBoard();
-            playerMove(player);
-            winner = checkWinner();
-            if(winner != ' ' || checkFreeSpaces() == 0){
-                break;
-            }
 
-            easyAiMove(computer);
-            winner = checkWinner();
-            if(winner != ' ' || checkFreeSpaces() == 0){
-                break;
+        if(order == 1){
+            while(winner == ' ' && checkFreeSpaces() != 0) {
+                printBoard();
+                playerMove(player);
+                winner = checkWinner();
+                if(winner != ' ' || checkFreeSpaces() == 0){
+                    break;
+                }
+
+
+                easyAiMove(computer);
+                winner = checkWinner();
+                if(winner != ' ' || checkFreeSpaces() == 0){
+                    break;
+                }
             }
         }
+
+        else if(order == 2){
+            while(winner == ' ' && checkFreeSpaces() != 0) {
+                printBoard();
+                easyAiMove(computer);
+                winner = checkWinner();
+                if(winner != ' ' || checkFreeSpaces() == 0){
+                    break;
+                }
+
+                playerMove(player);
+                winner = checkWinner();
+                if(winner != ' ' || checkFreeSpaces() == 0){
+                    break;
+                }
+            }
+        }
+
         printBoard();
         printWinner(winner, player, computer);
         printf("\nWould you like to play again? (Y/N): ");
@@ -105,9 +138,11 @@ void playerMove(char *player){
     int x, y;
 
     do{
+        cleanBufferStdin();
         printf("Enter row #(1-3): ");
         scanf("%d", &x);
         x--;
+        cleanBufferStdin();
         printf("Enter column #(1-3): ");
         scanf("%d", &y);
         y--;
@@ -126,8 +161,6 @@ void playerMove(char *player){
 void easyAiMove(char *computer){
     int x, y;
 
-    //creates a seed based on current time
-    srand(time(0));
     do{
         x = rand() % 3;
         y = rand() % 3;
@@ -174,4 +207,11 @@ void printWinner(char winner, char *player, char *computer){
     else{
         printf("IT'S A TIE!");
     }
+}
+
+void cleanBufferStdin(void){
+    int chr;
+    do{
+        chr = getchar();
+    } while (chr != '\n' && chr != EOF);
 }
